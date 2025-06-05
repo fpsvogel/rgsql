@@ -3,11 +3,14 @@
 # Run the server with `bin/server` or `bin/s`
 # Then visit http://localhost:3003 in your browser or run `curl -v http://localhost:3003`
 
+require "debug"
 require "socket"
 require_relative "live_reloader"
+require_relative "request"
+require_relative "response"
 
 class Server
-  DEFAULT_PORT = 3003 # 4000
+  DEFAULT_PORT = 3003
   START_MESSAGE = "Server is running"
 
   attr_reader :port
@@ -22,38 +25,31 @@ class Server
 
     LiveReloader.start
 
+    socket = server.accept
+
     loop do
-      client = server.accept
-    # request = Request.new(client)
-    # puts request
-    # puts
-    # response = Response.new(
-    #   "Hello Response!",
-    #   headers: {"Content-Language" => "en"}
-    # )
-    # puts response
-    # puts
-    # client.write(response.to_s)
-    # rescue Request::InvalidRequestError => e
-    #   response = Response.new(
-    #     "#{e.class}: #{e.message}\n#{e.backtrace.join("\n")}",
-    #     status: 400,
-    #     message: "Bad Request"
-    #   )
-    #   client&.write(response.to_s)
-    #   puts response
-    #   puts
-    #   next
+      raw_request = socket.gets("\0")
+      break if raw_request.nil?
+
+      request = Request.new(raw_request)
+      puts request.inspect
+
+      response = Response.new
+      puts response.inspect
+
+      socket.print(response)
+    rescue Request::InvalidRequestError => e
+      response = Response.new("Invalid Request: #{e.message}")
+      socket.print(response)
+      puts response.inspect
+      next
     rescue => e
-      response = Response.new(
-        "#{e.class}: #{e.message}\n#{e.backtrace.join("\n")}",
-        status: 500,
-        message: "Internal Server Error"
-      )
-      client&.write(response.to_s)
+      response = Response.new("Internal Server Error: #{e.class}: #{e.message}\n#{e.backtrace.join("\n")}")
+      socket.print(response)
+      socket.close
       raise e
-    ensure
-      client&.close
     end
+
+    socket.close
   end
 end
