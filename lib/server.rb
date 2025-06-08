@@ -3,7 +3,6 @@
 # Run the server with `bin/server` or `bin/s`
 # Then visit http://localhost:3003 in your browser or run `curl -v http://localhost:3003`
 
-require "debug"
 require "socket"
 require_relative "live_reloader"
 require_relative "request"
