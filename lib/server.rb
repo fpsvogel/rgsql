@@ -20,7 +20,7 @@ class Server
 
   def start
     server = TCPServer.new(port)
-    puts "#{START_MESSAGE} on port #{port}..."
+    # puts "#{START_MESSAGE} on port #{port}..."
 
     LiveReloader.start
 
@@ -31,17 +31,9 @@ class Server
       break if raw_request.nil?
 
       request = Request.new(raw_request)
-      puts request.inspect
+      response = Response.new(request)
 
-      response = Response.new
-      puts response.inspect
-
-      socket.print(response)
-    rescue Request::InvalidRequestError => e
-      response = Response.new("Invalid Request: #{e.message}")
-      socket.print(response)
-      puts response.inspect
-      next
+      socket.print(response.to_json + "\0")
     rescue => e
       response = Response.new("Internal Server Error: #{e.class}: #{e.message}\n#{e.backtrace.join("\n")}")
       socket.print(response)
