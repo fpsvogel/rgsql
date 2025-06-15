@@ -8,6 +8,7 @@ from test_runner.example_loader import ExampleLoader
 from test_runner.utils import import_module_by_path
 import test_runner.passed_reporter as passed_reporter
 from test_runner.test_error import TestError
+from test_runner.log_manager import LogManager
 
 current_dir = os.path.dirname(__file__)
 tests_dir = os.path.join(current_dir, '..', 'tests')
@@ -59,6 +60,7 @@ class Suite:
         finally:
             print("", end="", flush=True)
             ServerManager.ensure_server_stopped()
+            LogManager.print_logs()
 
     def run_sql_test_files(self):
         if not self.postgres_connection and not self.manual:

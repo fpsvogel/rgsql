@@ -87,16 +87,17 @@ class RgSqlClient:
         try:
             result = json.loads(response)
         except json.JSONDecodeError:
-            raise TestError(f"Cannot parse JSON from server: {response}")
+            raise TestError(
+                f"Server response should be a valid JSON, received: '{response}'")
 
         if 'status' not in result:
             raise TestError(
-                f"Server response does not contain a 'status' key: {response}")
+                f"Server response should contain a 'status' key set to 'ok or 'error', received: {response}")
 
         if result['status'] == 'error':
             if 'error_type' not in result:
                 raise TestError(
-                    f"Server response is 'error' but is missing 'error_type' key: {response}")
+                    f"Server response is 'error' but is missing 'error_type' key, received: {response}")
         elif result['status'] == 'ok':
             if 'rows' in result:
                 rows = result['rows']
@@ -113,6 +114,6 @@ class RgSqlClient:
                                 f"Expected each value to be a integer, boolean, string or null: {response}")
         else:
             raise TestError(
-                f"Unexpected status in response from server: {result['status']}")
+                f"'status' key should be set to 'ok' or 'error', was: {result['status']}")
 
         return result

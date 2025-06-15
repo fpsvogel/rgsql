@@ -20,6 +20,7 @@ jobs:
     # See examples at https://docs.github.com/en/actions/use-cases-and-examples/building-and-testing
 
     - name: Run tests
+      continue-on-error: ${{ vars.ALLOW_RGSQL_FAILURE == 'true' }}
       timeout-minutes: 5
       run: |
         ./run-tests
